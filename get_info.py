@@ -25,7 +25,7 @@ def print_user_data(df, user_id):
 
     print("\nPersonalized Message:")
     # Assuming the same message is relevant for all entries
-    print(user_data['personalized_message'].iloc[0])
+    print(user_data['response'].iloc[0])
 
 
 if __name__ == "__main__":
