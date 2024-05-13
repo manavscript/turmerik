@@ -78,36 +78,34 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     combined_df = pd.read_csv(args.filename)
-
     users = set(combined_df["author_id"].values)
 
-    i = 0
-    responses = []
+    # responses = []
+    responses = {}
     content_len = 0
     for user_id in sorted(users):
         p = create_prompt(combined_df, user_id)
         # print(p)
         messages = [{"role": "user", "content": p}]
-        print(i, len(messages[0]["content"]))
+        print(len(messages[0]["content"]))
         response = advanced_personalization(messages)
         print(len(response))
         content_len += len(messages[0]["content"]) + len(response)
         if content_len >= 30000:
             time.sleep(60)
             content_len = 0
-        responses.append(response)
-        i += 1
-
-    combined_df["personalized_message"] = responses
+        responses[user_id] = response
 
     with open('users.txt', 'w') as file:
         for item in sorted(users):
             file.write(f"{item}\n")
 
     responses_df = pd.DataFrame({
-        'author_id': list(sorted(users)),
-        'response': responses
+        'author_id': responses.keys(),
+        'response': responses.values()
     })
+
+    final_df = pd.merge(combined_df, responses_df, on='author_id', how='left')
 
     final_df = pd.merge(combined_df, responses_df, on='author_id', how='left')
     final_df.to_csv("combined_with_msg.csv")
